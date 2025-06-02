@@ -1,1 +1,47 @@
+id: open-redirect
 
+info:
+  name: Open Redirect Detection
+  author: chor4o
+  severity: medium
+  description: |
+    Detecta redirecionamentos abertos usando parâmetros comuns que podem ser manipulados para redirecionar usuários para domínios externos.
+  tags: openredirect,redirect,web
+
+variables:
+  redirect_host: "https://evil.com"  # pode personalizar com um domínio controlado
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/?next={{redirect_host}}"
+      - "{{BaseURL}}/?url={{redirect_host}}"
+      - "{{BaseURL}}/?target={{redirect_host}}"
+      - "{{BaseURL}}/?redir={{redirect_host}}"
+      - "{{BaseURL}}/?redirect={{redirect_host}}"
+      - "{{BaseURL}}/?destination={{redirect_host}}"
+      - "{{BaseURL}}/?go={{redirect_host}}"
+      - "{{BaseURL}}/?return={{redirect_host}}"
+      - "{{BaseURL}}/?returnUrl={{redirect_host}}"
+      - "{{BaseURL}}/?callback={{redirect_host}}"
+      - "{{BaseURL}}/?out={{redirect_host}}"
+      - "{{BaseURL}}/?to={{redirect_host}}"
+      - "{{BaseURL}}/?ref={{redirect_host}}"
+      - "{{BaseURL}}/?view={{redirect_host}}"
+
+    headers:
+      User-Agent: nuclei-open-redirect-test
+
+    redirects: true
+
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - "(?i)location:\s*{{redirect_host}}"
+
+    extractors:
+      - type: regex
+        part: header
+        regex:
+          - "(?i)location:\s*(.*)"
