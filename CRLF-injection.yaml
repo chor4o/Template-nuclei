@@ -1,0 +1,29 @@
+id: crlf-injection
+
+info:
+  name: CRLF Injection / HTTP Response Splitting
+  author: chor4o
+  severity: medium
+  description: |
+    Testa se é possível injetar novos cabeçalhos via CRLF, o que pode levar a HTTP response splitting, cache poisoning ou XSS indireto.
+  tags: crlf,injection,http
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/?q=%0d%0aInjected-Header:injected-value"
+
+    headers:
+      User-Agent: nuclei-crlf-injection
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Injected-Header: injected-value"
+        condition: contains
+
+      - type: status
+        status:
+          - 200
